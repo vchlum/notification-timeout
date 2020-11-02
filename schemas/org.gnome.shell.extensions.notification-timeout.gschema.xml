@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+
+  <schema id="org.gnome.shell.extensions.notification-timeout" path="/org/gnome/shell/extensions/notification-timeout/">
+
+    <!-- See also: https://developer.gnome.org/glib/stable/gvariant-format-strings.html -->
+
+    <key name="ignore-idle" type="b">
+      <default>true</default>
+      <summary>Ignores idle user - always timeout</summary>
+    </key>
+    <key name="timeout" type="i">
+      <default>3000</default>
+      <summary>Notification timeout</summary>
+    </key>
+  </schema>
+</schemalist>
