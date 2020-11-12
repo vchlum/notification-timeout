@@ -38,10 +38,11 @@ const Me = ExtensionUtils.getCurrentExtension();
 const MessageTray = imports.ui.messageTray;
 const Main = imports.ui.main;
 
-let originalUpdateNotificationTimeout = null;
-let originalUpdateStatus = null;
-
 let settings;
+let settingsConnectId;
+
+let modifiedUpdateNotificationTimeout = null;
+let modifiedUpdateStatus = null;
 
 let newTimeout = 1000;
 let ignoreIdle = true;
@@ -62,29 +63,8 @@ function readSettings() {
  * @method init
  */
 function init() {
-    settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.notification-timeout");
 
-    settings.connect("changed", () => {
-        readSettings();
-    });
-}
-
-/**
- * This function could be called after the extension is enabled.
- *
- * @method enable
- */
-function enable() {
-
-    readSettings();
-
-    /**
-     * Change _updateNotificationTimeout()
-     */
-    originalUpdateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeout;
-    MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig =  MessageTray.MessageTray.prototype._updateNotificationTimeout;
-
-    MessageTray.MessageTray.prototype._updateNotificationTimeout = function(timeout) {
+    modifiedUpdateNotificationTimeout = function(timeout) {
 
         if (timeout > 0) {
             timeout = newTimeout;
@@ -94,13 +74,7 @@ function enable() {
         this._updateNotificationTimeoutOrig(timeout);
     }
 
-    /**
-     * Change _updateState()
-     */
-    originalUpdateStatus = MessageTray.MessageTray.prototype._updateState;
-    MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
-
-    MessageTray.MessageTray.prototype._updateState = function() {
+    modifiedUpdateStatus = function() {
 
         if (ignoreIdle) {
             this._userActiveWhileNotificationShown = true;
@@ -109,6 +83,36 @@ function enable() {
         /* call the original _updateState anyway */
         this._updateStateOrig();
     }
+
+    log(`initializing ${Me.metadata.name} version ${Me.metadata.version}`);
+}
+
+/**
+ * This function could be called after the extension is enabled.
+ *
+ * @method enable
+ */
+function enable() {
+
+    settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.notification-timeout");
+    readSettings();
+    settingsConnectId = settings.connect("changed", () => {
+        readSettings();
+    });
+
+    /**
+     * Change _updateNotificationTimeout()
+     */
+    MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig =  MessageTray.MessageTray.prototype._updateNotificationTimeout;
+    MessageTray.MessageTray.prototype._updateNotificationTimeout = modifiedUpdateNotificationTimeout;
+
+    /**
+     * Change _updateState()
+     */
+    MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
+    MessageTray.MessageTray.prototype._updateState = modifiedUpdateStatus;
+
+    log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
 }
 
 /**
@@ -119,16 +123,19 @@ function enable() {
  */
 function disable() {
 
+    settings.disconnect(settingsConnectId);
+
     /**
      * Reveret change _updateNotificationTimeout()
      */
-    MessageTray.MessageTray.prototype._updateNotificationTimeout = originalUpdateNotificationTimeout;
+    MessageTray.MessageTray.prototype._updateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
     delete MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
 
     /**
      * Reveret change _updateState()
      */
-    MessageTray.MessageTray.prototype._updateState = originalUpdateStatus;
+    MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
     delete MessageTray.MessageTray.prototype._updateStateOrig;
 
+    log(`disabling ${Me.metadata.name} version ${Me.metadata.version}`);
 }
