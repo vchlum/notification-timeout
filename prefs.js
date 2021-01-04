@@ -63,8 +63,7 @@ function readSettings() {
  */
 function init() {
 
-    Gettext.textdomain(Me.metadata.uuid);
-    Gettext.bindtextdomain(Me.metadata.uuid, Me.dir.get_child("locale").get_path());
+    ExtensionUtils.initTranslations();
 
     settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.notification-timeout");
 }

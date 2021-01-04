@@ -8,5 +8,6 @@
       "3.36",
       "3.38"
     ],
+    "gettext-domain": "notification-timeout",
     "url": "https://github.com/vchlum/notification-timeout"
 }

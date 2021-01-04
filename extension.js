@@ -84,6 +84,8 @@ function init() {
         this._updateStateOrig();
     }
 
+    ExtensionUtils.initTranslations();
+
     log(`initializing ${Me.metadata.name} version ${Me.metadata.version}`);
 }
 
