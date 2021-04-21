@@ -35,7 +35,7 @@
 
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
-
+const Config = imports.misc.config;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
@@ -45,6 +45,20 @@ const _ = Gettext.gettext;
 let settings;
 let newTimeout = 1000;
 let ignoreIdle = true;
+
+/**
+ * Check gnome version
+ *
+ * @method isGnome40
+ * @return {Boolean} true if Gnome 40
+ */
+function isGnome40() {
+    if (parseInt(Config.PACKAGE_VERSION) >= 40) {
+        return true;
+    }
+
+    return false;
+}
 
 /**
  * Reads settings
@@ -196,9 +210,16 @@ function buildAboutPage() {
             valign:Gtk.Align.CENTER
         }
     );
-    aboutWidget.add(new Gtk.Label(
+
+    let labelWidget = new Gtk.Label(
         {label: `${Me.metadata.name}, version: ${Me.metadata.version}, Copyright (c) 2020 Václav Chlumský`}
-    ));
+    );
+
+    if (isGnome40()) {
+        aboutWidget.append(labelWidget);
+    } else {
+        aboutWidget.add(labelWidget);
+    }
 
     return aboutWidget;
 }
@@ -242,8 +263,15 @@ function buildPrefsWidget() {
         Gtk.Image.new_from_icon_name("help-about", Gtk.IconSize.MENU)
     );
 
-    prefsWidget.add(notebook);
-    prefsWidget.show_all();
+    if (isGnome40()) {
+        prefsWidget.set_child(notebook);
+    } else {
+        prefsWidget.add(notebook);
+    }
+
+    if (!isGnome40()) {
+        prefsWidget.show_all();
+    }
 
     return prefsWidget;
 }
