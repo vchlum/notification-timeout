@@ -126,6 +126,7 @@ function enable() {
 function disable() {
 
     settings.disconnect(settingsConnectId);
+    settings = null;
 
     /**
      * Reveret change _updateNotificationTimeout()
