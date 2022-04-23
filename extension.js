@@ -85,8 +85,6 @@ function init() {
     }
 
     ExtensionUtils.initTranslations();
-
-    log(`initializing ${Me.metadata.name} version ${Me.metadata.version}`);
 }
 
 /**
@@ -113,8 +111,6 @@ function enable() {
      */
     MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
     MessageTray.MessageTray.prototype._updateState = modifiedUpdateStatus;
-
-    log(`enabling ${Me.metadata.name} version ${Me.metadata.version}`);
 }
 
 /**
@@ -139,6 +135,4 @@ function disable() {
      */
     MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
     delete MessageTray.MessageTray.prototype._updateStateOrig;
-
-    log(`disabling ${Me.metadata.name} version ${Me.metadata.version}`);
 }
