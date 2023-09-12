@@ -5,14 +5,14 @@
  * JavaScript Gnome extension for setting same timeout for all notifications.
  *
  * @author Václav Chlumský
- * @copyright Copyright 2020, Václav Chlumský.
+ * @copyright Copyright 2023, Václav Chlumský.
  */
 
  /**
  * @license
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Václav Chlumský
+ * Copyright (c) 2023 Václav Chlumský
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -250,7 +250,7 @@ function buildAboutPage() {
     );
 
     let labelWidget = new Gtk.Label(
-        {label: `${Me.metadata.name}, version: ${Me.metadata.version}, Copyright (c) 2020 Václav Chlumský`}
+        {label: `${Me.metadata.name}, version: ${Me.metadata.version}, Copyright (c) 2023 Václav Chlumský`}
     );
 
     if (isGnome40()) {
