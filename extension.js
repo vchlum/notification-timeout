@@ -43,8 +43,10 @@ let settingsConnectId;
 
 let modifiedUpdateNotificationTimeout = null;
 let modifiedUpdateStatus = null;
+let modifiedShowNotification = null;
 
 let newTimeout = 1000;
+let alwaysNormal = true;
 let ignoreIdle = true;
 
 /**
@@ -54,6 +56,7 @@ let ignoreIdle = true;
  */
 function readSettings() {
     ignoreIdle = settings.get_boolean("ignore-idle");
+    alwaysNormal = settings.get_boolean("always-normal");
     newTimeout = settings.get_int("timeout");
 }
 
@@ -84,6 +87,15 @@ function init() {
         this._updateStateOrig();
     }
 
+    modifiedShowNotification = function() {
+        /* call the original _showNotification anyway */
+        this._showNotificationOrig();
+
+        if (alwaysNormal) {
+            this._notification.urgency = MessageTray.Urgency.NORMAL;
+        }
+    }
+
     ExtensionUtils.initTranslations();
 }
 
@@ -111,6 +123,12 @@ function enable() {
      */
     MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
     MessageTray.MessageTray.prototype._updateState = modifiedUpdateStatus;
+
+    /**
+     * Change _showNotification()
+     */
+    MessageTray.MessageTray.prototype._showNotificationOrig = MessageTray.MessageTray.prototype._showNotification;
+    MessageTray.MessageTray.prototype._showNotification = modifiedShowNotification;
 }
 
 /**
@@ -135,4 +153,10 @@ function disable() {
      */
     MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
     delete MessageTray.MessageTray.prototype._updateStateOrig;
+
+    /**
+     * Reveret change _showNotification()
+     */
+    MessageTray.MessageTray.prototype._showNotification = MessageTray.MessageTray.prototype._showNotificationOrig;
+    delete MessageTray.MessageTray.prototype._showNotificationOrig;
 }

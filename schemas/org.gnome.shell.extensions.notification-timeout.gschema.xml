@@ -9,6 +9,10 @@
       <default>true</default>
       <summary>Ignores idle user - always timeout</summary>
     </key>
+    <key name="always-normal" type="b">
+      <default>true</default>
+      <summary>Always as normal.</summary>
+    </key>
     <key name="timeout" type="i">
       <default>3000</default>
       <summary>Notification timeout</summary>

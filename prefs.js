@@ -44,6 +44,7 @@ const _ = Gettext.gettext;
 
 let settings;
 let newTimeout = 1000;
+let alwaysNormal = true;
 let ignoreIdle = true;
 
 /**
@@ -67,6 +68,7 @@ function isGnome40() {
  */
 function readSettings() {
     ignoreIdle = settings.get_boolean("ignore-idle");
+    alwaysNormal = settings.get_boolean("always-normal");
     newTimeout = settings.get_int("timeout");
 }
 
@@ -130,6 +132,42 @@ function buildGeneralPage() {
     )
     generalPage.attach_next_to(
         ignoreIdleSwitch,
+        labelWidget,
+        Gtk.PositionType.RIGHT,
+        1,
+        1
+    );
+
+    top++;
+
+    /**
+     * Notification' urgency is always normal
+     */
+    labelWidget = new Gtk.Label(
+        {label: _("Notification's urgency is always normal (critical don't timeout):")}
+    );
+    generalPage.attach(labelWidget, 1, top, 1, 1);
+
+
+    let alwaysNormalSwitch = new Gtk.Switch(
+        {
+            active: alwaysNormal,
+            hexpand: false,
+            vexpand: false,
+            halign:Gtk.Align.CENTER,
+            valign:Gtk.Align.CENTER
+        }
+    );
+
+    alwaysNormalSwitch.connect(
+        "notify::active",
+        () => {
+            alwaysNormal = alwaysNormalSwitch.get_active();
+            settings.set_boolean("always-normal", alwaysNormal);
+        }
+    )
+    generalPage.attach_next_to(
+        alwaysNormalSwitch,
         labelWidget,
         Gtk.PositionType.RIGHT,
         1,
