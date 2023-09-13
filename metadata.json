@@ -1,17 +1,12 @@
 {
     "uuid": "notification-timeout@chlumskyvaclav.gmail.com",
+    "settings-schema": "org.gnome.shell.extensions.notification-timeout",
     "name": "Notification Timeout",
     "description": "This extension allows configuring the same timeout for all notifications. It also allows ignoring the idle state.",
     "version": 8,
     "original-author": "chlumskyvaclav@gmail.com",
     "shell-version": [
-      "3.36",
-      "3.38",
-      "40",
-      "41",
-      "42",
-      "43",
-      "44"
+      "45"
     ],
     "gettext-domain": "notification-timeout",
     "url": "https://github.com/vchlum/notification-timeout"

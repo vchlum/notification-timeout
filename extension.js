@@ -32,43 +32,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
- 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const MessageTray = imports.ui.messageTray;
-const Main = imports.ui.main;
 
-let settings;
-let settingsConnectId;
-
-let modifiedUpdateNotificationTimeout = null;
-let modifiedUpdateStatus = null;
-let modifiedShowNotification = null;
+import * as MessageTray from 'resource:///org/gnome/shell/ui/messageTray.js';
+import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 let newTimeout = 1000;
 let alwaysNormal = true;
 let ignoreIdle = true;
 
-/**
- * Reads settings
- * 
- * @method readSettings
- */
-function readSettings() {
-    ignoreIdle = settings.get_boolean("ignore-idle");
-    alwaysNormal = settings.get_boolean("always-normal");
-    newTimeout = settings.get_int("timeout");
-}
+export default class NotificationTimeoutExtension extends Extension {
 
-/**
- * This function is called once the extension is loaded, not enabled.
- *
- * @method init
- */
-function init() {
+    readSettings() {
+        ignoreIdle = this._settings.get_boolean("ignore-idle");
+        alwaysNormal = this._settings.get_boolean("always-normal");
+        newTimeout = this._settings.get_int("timeout");
 
-    modifiedUpdateNotificationTimeout = function(timeout) {
+    }
 
+    _modifiedUpdateNotificationTimeout(timeout) {
         if (timeout > 0) {
             timeout = newTimeout;
         }
@@ -77,8 +58,7 @@ function init() {
         this._updateNotificationTimeoutOrig(timeout);
     }
 
-    modifiedUpdateStatus = function() {
-
+    _modifiedUpdateStatus() {
         if (ignoreIdle) {
             this._userActiveWhileNotificationShown = true;
         }
@@ -87,76 +67,64 @@ function init() {
         this._updateStateOrig();
     }
 
-    modifiedShowNotification = function() {
-        /* call the original _showNotification anyway */
-        this._showNotificationOrig();
-
+    _modifiedSetUrgency(urgency) {
+        /* call the original setUrgency */
         if (alwaysNormal) {
-            this._notification.urgency = MessageTray.Urgency.NORMAL;
+            this._setUrgencyOrig(MessageTray.Urgency.NORMAL);
+        } else {
+            this._setUrgencyOrig(urgency);
         }
     }
 
-    ExtensionUtils.initTranslations();
-}
+    enable() {
+        this._settings = this.getSettings();
 
-/**
- * This function could be called after the extension is enabled.
- *
- * @method enable
- */
-function enable() {
+        this.readSettings();
+        this._settingsConnectId = this._settings.connect(
+            "changed",
+            () => {
+                this.readSettings();
+            }
+        );
+        
+        /**
+         * Change _updateNotificationTimeout()
+         */
+        MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig =  MessageTray.MessageTray.prototype._updateNotificationTimeout;
+        MessageTray.MessageTray.prototype._updateNotificationTimeout = this._modifiedUpdateNotificationTimeout;
 
-    settings = ExtensionUtils.getSettings("org.gnome.shell.extensions.notification-timeout");
-    readSettings();
-    settingsConnectId = settings.connect("changed", () => {
-        readSettings();
-    });
+        /**
+         * Change _updateState()
+         */
+        MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
+        MessageTray.MessageTray.prototype._updateState = this._modifiedUpdateStatus;
 
-    /**
-     * Change _updateNotificationTimeout()
-     */
-    MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig =  MessageTray.MessageTray.prototype._updateNotificationTimeout;
-    MessageTray.MessageTray.prototype._updateNotificationTimeout = modifiedUpdateNotificationTimeout;
+        /**
+         * Change setUrgency()
+         */
+        MessageTray.Notification.prototype._setUrgencyOrig = MessageTray.Notification.prototype.setUrgency;
+        MessageTray.Notification.prototype.setUrgency = this._modifiedSetUrgency;
+    }
 
-    /**
-     * Change _updateState()
-     */
-    MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
-    MessageTray.MessageTray.prototype._updateState = modifiedUpdateStatus;
+    disable() {
+        this._settings.disconnect(this._settingsConnectId);
 
-    /**
-     * Change _showNotification()
-     */
-    MessageTray.MessageTray.prototype._showNotificationOrig = MessageTray.MessageTray.prototype._showNotification;
-    MessageTray.MessageTray.prototype._showNotification = modifiedShowNotification;
-}
+        /**
+         * Reveret change _updateNotificationTimeout()
+         */
+        MessageTray.MessageTray.prototype._updateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
+        delete MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
 
-/**
- * This function could be called after the extension is uninstalled,
- * disabled GNOME Tweaks, when you log out or when the screen locks.
- *
- * @method disable
- */
-function disable() {
+        /**
+         * Reveret change _updateState()
+         */
+        MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
+        delete MessageTray.MessageTray.prototype._updateStateOrig;
 
-    settings.disconnect(settingsConnectId);
-    settings = null;
-
-    /**
-     * Reveret change _updateNotificationTimeout()
-     */
-    MessageTray.MessageTray.prototype._updateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
-    delete MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
-
-    /**
-     * Reveret change _updateState()
-     */
-    MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
-    delete MessageTray.MessageTray.prototype._updateStateOrig;
-
-    /**
-     * Reveret change _showNotification()
-     */
-    MessageTray.MessageTray.prototype._showNotification = MessageTray.MessageTray.prototype._showNotificationOrig;
-    delete MessageTray.MessageTray.prototype._showNotificationOrig;
+        /**
+         * Reveret change setUrgency()
+         */
+        MessageTray.Notification.prototype.setUrgency = MessageTray.Notification.prototype._setUrgencyOrig;
+        delete MessageTray.Notification.prototype._setUrgencyOrig;
+    }
 }
