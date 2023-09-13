@@ -13,7 +13,12 @@ https://extensions.gnome.org/extension/3795/notification-timeout/
 
  1. `git clone https://github.com/vchlum/notification-timeout.git`
  1. `cd notification-timeout`
- 1. `./release.sh`
- 1. `gnome-extensions install notification-timeout@chlumskyvaclav.gmail.com.zip`
+ 1. `make build`
+ 1. `make install`
  1. Log out & Log in
  1. `gnome-extensions enable notification-timeout@chlumskyvaclav.gmail.com`
+
+## Install dependencies
+  - These are only required to install from source
+  - `make`
+  - `gnome-shell` (`gnome-extensions` command)

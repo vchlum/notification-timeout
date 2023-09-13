@@ -1,5 +1,5 @@
 #!/bin/bash
 
-glib-compile-schemas schemas/
-zip -r notification-timeout@chlumskyvaclav.gmail.com.zip . --exclude=po/\* --exclude=.git/\* --exclude=*.sh --exclude=*.zip
-
+make clean
+make build
+mv build/notification-timeout@chlumskyvaclav.gmail.com.zip ./notification-timeout@chlumskyvaclav.gmail.com.zip
