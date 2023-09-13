@@ -4,7 +4,7 @@
 notification-timeout is a Gnome Shell extension that allows configuring the same timeout for all notifications. It also allows ignoring the idle state, which means all the notification can timeout even if the system is idle.
 
 ## Supported Gnome Shell version
-This extension supports Gnome Shell verison 3.36 and above.
+This extension supports Gnome Shell verison 45 and above.
 
 ## Installation from e.g.o
 https://extensions.gnome.org/extension/3795/notification-timeout/
