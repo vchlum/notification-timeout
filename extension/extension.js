@@ -69,7 +69,9 @@ export default class NotificationTimeoutExtension extends Extension {
 
     _modifiedSetUrgency(urgency) {
         /* call the original setUrgency */
-        if (alwaysNormal) {
+        if (newTimeout === 0) {
+            this._setUrgencyOrig(MessageTray.Urgency.CRITICAL);
+        } else if (alwaysNormal) {
             this._setUrgencyOrig(MessageTray.Urgency.NORMAL);
         } else {
             this._setUrgencyOrig(urgency);

@@ -111,7 +111,7 @@ export const PreferencesPage = GObject.registerClass({
          * Notification' urgency is always normal
          */
         labelWidget = new Gtk.Label(
-            {label: _("Notification's urgency is always normal (critical don't timeout):")}
+            {label: _("Timeouted notifications are always 'normal' ('critical' don't timeout):")}
         );
         generalPage.attach(labelWidget, 1, top, 1, 1);
 
@@ -153,6 +153,7 @@ export const PreferencesPage = GObject.registerClass({
 
         let timeoutComboBox = new Gtk.ComboBoxText();
 
+        timeoutComboBox.append("0", _("Don't timeout"));
         timeoutComboBox.append("500", _("500 ms"));
         timeoutComboBox.append("1000", _("1 s"));
         timeoutComboBox.append("2000", _("2 s"));
