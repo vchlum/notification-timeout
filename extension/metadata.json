@@ -3,7 +3,7 @@
     "settings-schema": "org.gnome.shell.extensions.notification-timeout",
     "name": "Notification Timeout",
     "description": "This extension allows configuring the same timeout for all notifications. It also allows ignoring the idle state.",
-    "version": 8,
+    "version": 9,
     "original-author": "chlumskyvaclav@gmail.com",
     "shell-version": [
       "45"

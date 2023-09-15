@@ -1,3 +1,6 @@
+## Version 9
+ * porting to Gnome 45
+ * add 'do not timeout' option
 ## Version 8
  * add possibility to change urgency to normal
 ## Version 7
