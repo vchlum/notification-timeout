@@ -18,6 +18,8 @@ package:
 	@cd "extension"; \
 	gnome-extensions pack --force \
 	--extra-source=../LICENSE \
+	--extra-source=../CHANGELOG.md \
+	--extra-source=../LICENSE \
 	--extra-source=../README.md \
 	--extra-source=prefspage.js \
 	-o ../$(BUILD_DIR)/
