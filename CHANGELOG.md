@@ -1,3 +1,5 @@
+## Version 10
+ * null 'this._settings' in disable
 ## Version 9
  * porting to Gnome 45
  * add 'do not timeout' option
