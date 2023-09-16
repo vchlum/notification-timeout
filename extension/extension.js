@@ -110,6 +110,7 @@ export default class NotificationTimeoutExtension extends Extension {
 
     disable() {
         this._settings.disconnect(this._settingsConnectId);
+        this._settings = null;
 
         /**
          * Reveret change _updateNotificationTimeout()
