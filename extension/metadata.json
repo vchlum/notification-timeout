@@ -6,7 +6,8 @@
     "version": 10,
     "original-author": "chlumskyvaclav@gmail.com",
     "shell-version": [
-      "45"
+      "45",
+      "46"
     ],
     "gettext-domain": "notification-timeout",
     "url": "https://github.com/vchlum/notification-timeout"
