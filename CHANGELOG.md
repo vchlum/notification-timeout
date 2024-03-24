@@ -1,3 +1,5 @@
+## Version 11
+ * Gnome 46 support
 ## Version 10
  * null 'this._settings' in disable
 ## Version 9
