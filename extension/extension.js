@@ -46,7 +46,6 @@ export default class NotificationTimeoutExtension extends Extension {
         ignoreIdle = this._settings.get_boolean("ignore-idle");
         alwaysNormal = this._settings.get_boolean("always-normal");
         newTimeout = this._settings.get_int("timeout");
-
     }
 
     _modifiedUpdateNotificationTimeout(timeout) {
@@ -56,15 +55,25 @@ export default class NotificationTimeoutExtension extends Extension {
 
         /* call the original _updateNotificationTimeout with new timeout */
         this._updateNotificationTimeoutOrig(timeout);
-    }
 
-    _modifiedUpdateStatus() {
+        // Force active state immediately when notification timeout is set
+        // This ensures the initial timer is respected even if the user is currently idle
         if (ignoreIdle) {
             this._userActiveWhileNotificationShown = true;
         }
+    }
 
-        /* call the original _updateState anyway */
+    _modifiedUpdateStatus() {
+        /* call the original _updateState first */
+        // This calculates the standard idle state based on mouse movement and resets _userActiveWhileNotificationShown
         this._updateStateOrig();
+
+        // Override the result AFTER the original function runs.
+        // If we do this before, _updateStateOrig will overwrite our true back to false
+        // if the user hasn't moved the mouse.
+        if (ignoreIdle) {
+            this._userActiveWhileNotificationShown = true;
+        }
     }
 
     _modifiedSetUrgency(urgency) {
@@ -109,25 +118,33 @@ export default class NotificationTimeoutExtension extends Extension {
     }
 
     disable() {
-        this._settings.disconnect(this._settingsConnectId);
-        this._settings = null;
+        if (this._settings) {
+            this._settings.disconnect(this._settingsConnectId);
+            this._settings = null;
+        }
 
         /**
-         * Reveret change _updateNotificationTimeout()
+         * Revert change _updateNotificationTimeout()
          */
-        MessageTray.MessageTray.prototype._updateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
-        delete MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
+        if (MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig) {
+            MessageTray.MessageTray.prototype._updateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
+            delete MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
+        }
 
         /**
-         * Reveret change _updateState()
+         * Revert change _updateState()
          */
-        MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
-        delete MessageTray.MessageTray.prototype._updateStateOrig;
+        if (MessageTray.MessageTray.prototype._updateStateOrig) {
+            MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
+            delete MessageTray.MessageTray.prototype._updateStateOrig;
+        }
 
         /**
-         * Reveret change setUrgency()
+         * Revert change setUrgency()
          */
-        MessageTray.Notification.prototype.setUrgency = MessageTray.Notification.prototype._setUrgencyOrig;
-        delete MessageTray.Notification.prototype._setUrgencyOrig;
+        if (MessageTray.Notification.prototype._setUrgencyOrig) {
+            MessageTray.Notification.prototype.setUrgency = MessageTray.Notification.prototype._setUrgencyOrig;
+            delete MessageTray.Notification.prototype._setUrgencyOrig;
+        }
     }
 }
