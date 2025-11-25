@@ -56,23 +56,17 @@ export default class NotificationTimeoutExtension extends Extension {
         /* call the original _updateNotificationTimeout with new timeout */
         this._updateNotificationTimeoutOrig(timeout);
 
-        // Force active state immediately when notification timeout is set
-        // This ensures the initial timer is respected even if the user is currently idle
+        // CHANGE: Fix idle detection without crashing the loop.
+        // Instead of patching _updateState (which runs every second and causes crashes),
+        // we simply tell the tray that a user action happened *right now* when the notification appears.
         if (ignoreIdle) {
             this._userActiveWhileNotificationShown = true;
-        }
-    }
-
-    _modifiedUpdateStatus() {
-        /* call the original _updateState first */
-        // This calculates the standard idle state based on mouse movement and resets _userActiveWhileNotificationShown
-        this._updateStateOrig();
-
-        // Override the result AFTER the original function runs.
-        // If we do this before, _updateStateOrig will overwrite our true back to false
-        // if the user hasn't moved the mouse.
-        if (ignoreIdle) {
-            this._userActiveWhileNotificationShown = true;
+            
+            // Updating the timestamp ensures that the next native _updateState check 
+            // calculates "idle time" as 0, preventing it from resetting the active flag.
+            if (global.get_current_time) {
+                this._lastUserActionTime = global.get_current_time();
+            }
         }
     }
 
@@ -105,12 +99,6 @@ export default class NotificationTimeoutExtension extends Extension {
         MessageTray.MessageTray.prototype._updateNotificationTimeout = this._modifiedUpdateNotificationTimeout;
 
         /**
-         * Change _updateState()
-         */
-        MessageTray.MessageTray.prototype._updateStateOrig = MessageTray.MessageTray.prototype._updateState;
-        MessageTray.MessageTray.prototype._updateState = this._modifiedUpdateStatus;
-
-        /**
          * Change setUrgency()
          */
         MessageTray.Notification.prototype._setUrgencyOrig = MessageTray.Notification.prototype.setUrgency;
@@ -129,14 +117,6 @@ export default class NotificationTimeoutExtension extends Extension {
         if (MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig) {
             MessageTray.MessageTray.prototype._updateNotificationTimeout = MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
             delete MessageTray.MessageTray.prototype._updateNotificationTimeoutOrig;
-        }
-
-        /**
-         * Revert change _updateState()
-         */
-        if (MessageTray.MessageTray.prototype._updateStateOrig) {
-            MessageTray.MessageTray.prototype._updateState = MessageTray.MessageTray.prototype._updateStateOrig;
-            delete MessageTray.MessageTray.prototype._updateStateOrig;
         }
 
         /**
