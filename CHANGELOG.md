@@ -1,3 +1,7 @@
+## Version 15
+ * add Gnome 50 support
+ * drop Gnome < 49 support
+ * fix critical notification timeout
 ## Version 14
  * add Gnome 49 support
 ## Version 13
