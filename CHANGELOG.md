@@ -1,3 +1,5 @@
+## Version 16
+ * remove old setUrgency
 ## Version 15
  * add Gnome 50 support
  * drop Gnome < 49 support
