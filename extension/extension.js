@@ -39,6 +39,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 let newTimeout = 1000;
 let alwaysNormal = true;
 let ignoreIdle = true;
+let origUrgency = null;
 
 export default class NotificationTimeoutExtension extends Extension {
 
@@ -99,10 +100,25 @@ export default class NotificationTimeoutExtension extends Extension {
         MessageTray.MessageTray.prototype._updateNotificationTimeout = this._modifiedUpdateNotificationTimeout;
 
         /**
-         * Change setUrgency()
+         * Change urgency
          */
-        MessageTray.Notification.prototype._setUrgencyOrig = MessageTray.Notification.prototype.setUrgency;
+        origUrgency = Object.getOwnPropertyDescriptor(MessageTray.Notification.prototype, 'urgency');
         MessageTray.Notification.prototype.setUrgency = this._modifiedSetUrgency;
+
+        Object.defineProperty(MessageTray.Notification.prototype, 'urgency', {
+            get: function() {
+                return origUrgency.get.call(this);
+            },
+            set: function(urgency) {
+                if (newTimeout === 0) {
+                    origUrgency.set.call(this, MessageTray.Urgency.CRITICAL);
+                } else if (alwaysNormal) {
+                    origUrgency.set.call(this, MessageTray.Urgency.NORMAL);
+                } else {
+                    origUrgency.set.call(this, urgency);
+                }
+            }
+        });
     }
 
     disable() {
@@ -120,11 +136,8 @@ export default class NotificationTimeoutExtension extends Extension {
         }
 
         /**
-         * Revert change setUrgency()
+         * Revert change urgency()
          */
-        if (MessageTray.Notification.prototype._setUrgencyOrig) {
-            MessageTray.Notification.prototype.setUrgency = MessageTray.Notification.prototype._setUrgencyOrig;
-            delete MessageTray.Notification.prototype._setUrgencyOrig;
-        }
+        Object.defineProperty(MessageTray.Notification.prototype, 'urgency', origUrgency);
     }
 }
