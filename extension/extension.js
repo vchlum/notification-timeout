@@ -71,17 +71,6 @@ export default class NotificationTimeoutExtension extends Extension {
         }
     }
 
-    _modifiedSetUrgency(urgency) {
-        /* call the original setUrgency */
-        if (newTimeout === 0) {
-            this._setUrgencyOrig(MessageTray.Urgency.CRITICAL);
-        } else if (alwaysNormal) {
-            this._setUrgencyOrig(MessageTray.Urgency.NORMAL);
-        } else {
-            this._setUrgencyOrig(urgency);
-        }
-    }
-
     enable() {
         this._settings = this.getSettings();
 
@@ -103,7 +92,6 @@ export default class NotificationTimeoutExtension extends Extension {
          * Change urgency
          */
         origUrgency = Object.getOwnPropertyDescriptor(MessageTray.Notification.prototype, 'urgency');
-        MessageTray.Notification.prototype.setUrgency = this._modifiedSetUrgency;
 
         Object.defineProperty(MessageTray.Notification.prototype, 'urgency', {
             get: function() {
