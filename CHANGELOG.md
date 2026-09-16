@@ -1,3 +1,5 @@
+## Version 17
+ * add GNOME 51
 ## Version 16
  * remove old setUrgency
 ## Version 15
